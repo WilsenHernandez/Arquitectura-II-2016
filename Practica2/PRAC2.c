@@ -17,13 +17,13 @@ int main(int argc, char **argv)
 
     for (int pasada = 0; pasada < N; pasada++)
     {
-        for (int i = 0; i < N - pasada - 1; i++)
+        for (int j = 0; j < N - pasada - 1; j++)
         {
-            if (a[i] > a[i+1])
+            if (a[j] > a[j+1])
             {
-                char aux = a[i];
-                a[i] = a[i+1];
-                a[i+1] = aux;
+                char aux = a[j];
+                a[j] = a[j+1];
+                a[j+1] = aux;
             }
         }
     }
