@@ -1,0 +1,452 @@
+\documentclass[doc, donotrepeattitle, biblatex, apacite]{apa6}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage[hyphens]{url}
+\graphicspath{ {img/} }
+
+\title{Practica de Laboratorio \#2}
+\shorttitle{Practica \#2}
+
+\author{Icler Anaya --- 24.450.482
+
+Wilsen Hernandez --- 24.993.998}
+\affiliation{Universidad de Carabobo
+
+Facultad Experimental de Ciencias y Tecnología
+
+Departamento de Computación
+
+Arquitectura del Computador}
+
+\begin{document}
+\maketitle
+\section{Introducción}
+En este informe se encuentra plasmado la Práctica \#2 de la materia Arquitectura del Computador,
+la cual consiste en desarrollar el método de ordenamiento burbuja en el lenguaje assembler,
+para una serie de caracteres dispuestos al azar para su posterior ordenamiento.
+
+El algoritmo de Ordenamiento Burbuja funciona revisando cada elemento de una lista dada comparando un elemento $i$ 
+con el elemento siguiente $i+1$, sí el primero es mayor que el segundo entonces $i$ intercambia posiciones con $i+1$, 
+y si el primer elemento es menor entonces se pasa al siguiente elemento 
+de la lista para ser comparados con los restantes.
+
+La forma metodológica de abordar el problema es la experimental, ya que de esta forma es posible evaluar los procesos, 
+observar los criterios para el armado del programa y conocer el código que hace posible la resolución del problema, 
+además conduce a lograr un mayor dominio en cuanto al lenguaje assembler del microprocesador Intel 8051 
+mediante la programación de este método de ordenamiento.
+
+\newpage
+\section{Marco Teorico}
+\subsection{El problema}
+Consiste en realizar en lenguaje assembler, a través de la simulación del comportamiento del microcontrolador 8051 como
+arquitectura para el lenguaje,  un programa que implemente el método de ordenamiento burbuja dado un vector compuesto de
+$n$ caracteres ASCII en el rango A-Z generado a través del método congruencial lineal mixto que genera una secuencia repetitiva de $n$ números enteros que son una aproximación muy cercana a lo que puede ser una secuencia aleatoria de números. El primer elemento del vector a ordenar estará ubicado en la dirección \texttt{30H} de la memoria RAM, validando que la cantidad de elementos a ordenar $n$ no supera la dirección \texttt{7FH}, es decir la cantidad máxima de elementos aceptados es \texttt{4FH} (hexadecimal).
+
+Además, se tiene que validar que los elementos del vector se encuentren en el rango de letras mayúsculas “A-Z”. A su vez, se debe tener en cuenta que el parámetro $n$ estará localizado en el registro R5 y que el programa intercambie posiciones de los elementos del vector original en el mismo lugar donde el vector reside.
+
+Por último, se debe guardar en las direcciones \texttt{2EH} y \texttt{2FH} el número total de intercambios realizados durante el proceso de ordenamiento como un número entero de 16 bits.
+
+\subsection{Objetivos}
+\begin{itemize}
+\item Implementar de manera eficiente el método de ordenamiento burbuja en el lenguaje assembler del microprocesador
+Intel 8051.
+\item Identificar cuales son los modos de direccionamiento del microprocesador Intel 8051 y listarlos con sus ejemplos.
+\item Identificar cómo se hacen las comparaciones y ejemplificar.
+\end{itemize}
+
+Además de estos objetivos puntuales y específicos resalta como objetivo realizar comparaciones entre los elementos del vector a ordenar para guardar en las direcciones \texttt{2E}/\texttt{2F} el número total de intercambios realizados durante el proceso de ordenamiento.
+
+\subsection{Métodos Congruenciales}
+Se han desarrollado básicamente tres métodos de congruenciales para generar
+números pseudoaleatorios, los cuales se derivan del empleo de diferentes
+versiones de la relación fundamental de congruencia. El objetivo de cada uno de
+los métodos es la generación en un tiempo mínimo, de sucesiones de números
+aleatorios con periodos máximos. Los métodos congruenciales son: el aditivo, el
+multiplicativo y el mixto. En nuestro caso, vamos a dar uso al Método Congruencial Mixto.
+
+\subsubsection{Método Congruencial Mixto:}
+Los generadores congruenciales
+lineales generan una secuencia de números pseudoaleatorios en la cual el
+próximo número pseudoaleatorio es determinado a partir del último número
+generado, es decir, el número pseudoaleatorio $X_{n+1}$ es derivado a partir del
+número pseudoaleatorio $Xn$
+La relación de recurrencia para el generador
+congruencial mixto es $X_{n+1} =(a X_{n}+c) \ mod \ m$, en donde:
+\begin{itemize}
+\item $X_{0}$ = es la semilla
+\item $a$ = es el multiplicador
+\item $c$ = constante aditiva
+\item $m$ = el modulo ($m > X_{0}$,$a$,$c$)
+\item $X_{0}$, $a$, $c > 0$
+\end{itemize}
+
+Esta relación de recurrencia nos dice que $X_{n+1}$ es el residuo de dividir $aX_{n}+c$ entre
+el modulo. Lo anterior significa que los valores posibles de $X_{n+1}$ son $0,1,2,3 ....m-1$,
+es decir, $m$ representa el número posible de valores diferentes que pueden sergenerados.
+
+Cuando se quiere construir un generador de números aleatorios para simular los
+valores de una variable aleatoria, se deben elegir los parámetros de tal manera
+que se garantice un periodo largo para que se puedan hacer todos los ensayos de
+simulación, por lo tanto se deben tener en cuenta las siguientes condiciones:
+\begin{itemize}
+\item $a$ debe ser un número impar, no divisible ni por 3 ni por 5.
+\item $c$ usualmente puede ser cualquier constante, sin embargo, para asegurar
+buenos resultados, se debe seleccionar a de tal forma que, $a \ mod \ 8 = 5$ para
+una computadora binaria, o $a \ mod \ 200 = 21$ para computadora decimal.
+\item $m$ debe ser el número entero más grande que la computadora acepte.
+
+\end{itemize}
+\subsubsection{Ejemplo:}
+Supongamos que $a=5$, $c= 7$, $X_{0}=7$ y $m=8$. Entonces los resultados son:
+\begin{center}
+	\begin{tabular}{|c|c|c|}
+		\hline
+		$n$ & $X_{n}$ & $X_{n+1}$
+		\\ \hline
+		0 & 7 & 2
+		\\
+		1 & 2 & 1
+		\\
+		2  & 1 & 4
+		\\
+		3 & 4 & 3
+		\\
+		4 & 3 & 6
+		\\
+		5 & 6 & 5
+		\\
+		6 & 5 & 0
+		\\
+		7 & 0 & 7
+		\\
+		... & ... & ...
+		\\
+		\hline
+	\end{tabular}
+\end{center}
+
+Nótese que después de 8 pasadas el valor inicial de $X$ se repite. Decimos entonces que el \textbf{periodo del
+generador} es 8, y efectivamente este es igual al módulo. Eso no siempre es así. Viendo un caso donde el
+periodo es menor a m. El valor de los parámetros es $a=c=X_{0}=4$ y $m=6$. Ahora lo resultados son:
+\begin{center}
+	\begin{tabular}{|c|c|c|}
+		\hline
+		$n$ & $X_{n}$ & $X_{n+1}$
+		\\ \hline
+		0 & 4 & 6
+		\\
+		1 & 6 & 0
+		\\
+		2 & 0 & 4
+		\\
+		... & ... & ...
+		\\
+		\hline
+	\end{tabular}
+\end{center}
+
+Como hemos podido observar, este método nos ayuda mucho en la generación de un vector con
+elementos aleatorios en el \textit{microprocesador Intel 805}, y que efectivamente podremos comparar a cada
+uno de estos elementos generados con su equivalente al código ASCII en el rango \texttt{A-Z} en mayúsculas
+respectivamente.
+
+\subsection{Algoritmo de Ordenamiento Burbuja}
+El ordenamiento burbuja es un algoritmo de clasificación simple. El ordenamiento burbuja
+funciona organizando elementos adyacentes repetidamente si no están en el orden correcto. La lista está
+ordenada, cuando no se necesita intercambio.
+
+Haciendo esto, el elemento más pequeño burbujea al tope, por eso esta técnica ordenamiento se
+llama ordenamiento burbuja.
+
+El ordenamiento burbuja es un algoritmo de clasificación sencillo que es fácil de entender y
+rápido de implementar. Sin embargo, en la práctica, no se recomienda.
+
+La complejidad del algoritmo de ordenamiento burbuja es de \textbf{O($n^{2}$)}. Su eficiencia disminuye
+drásticamente cuando aumenta el número de elementos en la lista sin clasificar.
+\newpage
+\section{Parte Experimental}
+\subsection{Software Utilizado}
+El desarrollo de este programa fue realizado y testeado principalmente bajo un entorno Linux. Simulado utilizando AVSIM 8051 Simulator/Debugger V1.31 en un entorno DOS simulado utilizando DOSBox.
+\begin{center}
+\includegraphics[scale=0.5]{screenshot1}
+\end{center}
+
+\subsection{Material de apoyo}
+\begin{itemize}
+\item Microcontrolador 8051 --– I. Scott MacKemzie \& Raphael C.-W. Phan –- Pearson.
+\item Manual del microcontrolador 8051 – Dr. Alejandro Vega.
+\item 8051 Cross Assembler User’s Manual – Metalink Corporation.
+\end{itemize}
+
+\subsection{Grupo de comandos utilizados}
+Se utilizaron el siguiente juego de instrucciones: \texttt{ADD}, \texttt{SUBB}, \texttt{MUL}, \texttt{DIV} y \texttt{XCH}, para poder elaborar el programa en lenguaje ensamblador.
+
+\newpage
+\subsection{Instruccion SUBB}
+\begin{itemize}
+\item \textbf{Funcion:} Resta con llevada.
+\item \textbf{Sintaxis:} \texttt{SUBB A, operando}
+\end{itemize}
+
+\begin{center}
+	\begin{tabular}{|l|c|c|c|c|c|}
+		\hline
+		Instrucción & Código de Operacion & 2º byte & Bytes & Ciclos & Flags
+		\\ \hline
+		\texttt{SUBB A, Rn} & \texttt{10011rrr} & - & 1 & 1 & C-AC-OV
+		\\
+		\texttt{SUBB A, direcc} & \texttt{0x95} & direcc & 2 & 1 & C-AC-OV
+		\\
+		\texttt{SUBB A,@Ri} & \texttt{1001011i} & - & 1 & 1 & C-AC-OV
+		\\
+		\texttt{SUBB A,\#dato} & \texttt{0x94} & dato & 2 & 1 & C-AC-OV
+		\\ \hline
+	\end{tabular}
+\end{center}
+
+\begin{itemize}
+\item \textbf{Operacion:} \texttt{SUBB A,operando}
+
+\texttt{(A) <= (A) - (C) - operando}
+\item \textbf{Descripcion:} SUBB resta al acumulador el valor del operando y el bit de acarreo C. Deja el resultado en el Acumulador. El valor del operando no resulta afectado.
+\end{itemize}
+
+\subsection{Instruccion ADD}
+\begin{itemize}
+\item \textbf{Funcion:} Suma el operando implicado al ACC y deja el resultado en ACC.
+\item \textbf{Sintaxis:} \texttt{ADD A, operando}
+\end{itemize}
+
+\begin{center}
+	\begin{tabular}{|l|c|c|c|c|c|}
+		\hline
+		Instrucción & Código de Operacion & 2º byte & Bytes & Ciclos & Flags
+		\\ \hline
+		\texttt{ADD A, Rn} & \texttt{00101rrr} & - & 1 & 1 & C-AC-OV
+		\\
+		\texttt{ADD A, direcc} & \texttt{0x25} & direcc & 2 & 1 & C-AC-OV
+		\\
+		\texttt{ADD A,@Ri} & \texttt{0010011i} & - & 1 & 1 & C-AC-OV
+		\\
+		\texttt{ADD A,\#dato} & \texttt{0x24} & dato & 2 & 1 & C-AC-OV
+		\\ \hline
+	\end{tabular}
+\end{center}
+
+\begin{itemize}
+\item \textbf{Operacion:} \texttt{ADD A,operando}
+
+\texttt{(A) <= (A) + operando}
+\item \textbf{Descripcion:} ADD suma el valor del operando al valor del Acumulador, y deja el resultado en el Acumulador. El valor del operando no resulta afectado.
+\end{itemize}
+
+\newpage
+\subsection{Instruccion MUL}
+\begin{itemize}
+\item \textbf{Funcion:} Multiplica el contenido del acumulador por el contenido del registro B.
+\item \textbf{Sintaxis:} \texttt{MUL AB}
+\end{itemize}
+
+\begin{center}
+	\begin{tabular}{|l|c|c|c|c|}
+		\hline
+		Instrucción & Código de Operacion & Bytes & Ciclos & Flags
+		\\ \hline
+		\texttt{MUL AB} & \texttt{0xA4} & 1 & 4 & C-OV
+		\\ \hline
+	\end{tabular}
+\end{center}
+
+\begin{itemize}
+\item \textbf{Operacion:} \texttt{MUL AB}
+
+\texttt{(A) <= Byte bajo del producto (A)x(B)}
+
+\texttt{(B) <= Byte alto del producto (A)x(B)}
+
+\item \textbf{Descripcion:} \texttt{MUL AB} multiplica el contenido del acumulador por el contenido del registro B. El byte bajo del resultado de 16 bits se deja en el acumulador, y el byte alto en el registro B. Si el producto es mayor que 255 (\texttt{0xFF}) el flag de \textbf{Overflow (OV)} se pone a 1. En caso contrario OV se pone a 0.
+\end{itemize}
+
+\subsection{Instruccion DIV}
+\begin{itemize}
+\item \textbf{Funcion:} Divide el contenido del acumulador entre el contenido del registro B.
+\item \textbf{Sintaxis:} \texttt{DIV AB}
+\end{itemize}
+
+\begin{center}
+	\begin{tabular}{|l|c|c|c|c|}
+		\hline
+		Instrucción & Código de Operacion & Bytes & Ciclos & Flags
+		\\ \hline
+		\texttt{DIV AB} & \texttt{0x84} & 1 & 4 & C-OV
+		\\ \hline
+	\end{tabular}
+\end{center}
+
+\begin{itemize}
+\item \textbf{Operacion:} \texttt{DIV AB}
+
+\texttt{(A) <= Cociente de la divisón entera (A)/(B)}
+
+\texttt{(B) <= Resto de la division entera (A)/(B)}
+
+\item \textbf{Descripcion:} Divide (división entera) el contenido del acumulador entre el contenido del registro B. El cociente se deja en el acumulador y el resto se deja en el registro B. Si inicialmente el registro B tiene valor 0, tras la división el contenido del acumulador y del registro B es indeterminado, y se activa el flag OV.
+\end{itemize}
+
+\newpage
+\subsection{Instruccion XCH}
+\begin{itemize}
+\item \textbf{Funcion:} Intercambia los contenidos del Acumulador y del operando implicado.
+\item \textbf{Sintaxis:} \texttt{XCH A, operando}
+\end{itemize}
+
+\begin{center}
+	\begin{tabular}{|l|c|c|c|c|c|}
+		\hline
+		Instrucción & Código de Operacion & 2º byte & Bytes & Ciclos & Flags
+		\\ \hline
+		\texttt{XCH A, Rn} & \texttt{11001rrr} & - & 1 & 1 & -
+		\\
+		\texttt{XCH A, direcc} & \texttt{0xC5} & direcc & 2 & 1 & -
+		\\
+		\texttt{XCH A,@Ri} & \texttt{1100011i} & - & 1 & 1 & -
+		\\ \hline
+	\end{tabular}
+\end{center}
+
+\begin{itemize}
+\item \textbf{Operacion:} \texttt{XCH A,operando}
+
+\texttt{(A) <=> (operando)}
+\item \textbf{Descripcion:} XCH intercambia los contenidos del Acumulador y del operando implicado.
+\end{itemize}
+
+\subsection{Procedimiento}
+Antes de comenzar con el desarollo del programa en assembler 8051, se realizó una investigación a fondo de las distintas 
+implementaciones y variaciones del algoritmo de Ordenamiento Burbuja (BubbleSort) 
+hasta elegir la que fuera más conveniente y fácil de implementar utilizando el repertorio de 
+instrucciones que ofrece el Microcontrolador Intel 8051. 
+Seguido a esto, igualmente investigamos y desarrollamos la generación aleatoria de caracteres utilizando el método congruencial mixto. 
+Se varió con los parámetros iniciales del método descrito hasta determinar una condicion inicial que satis faciera nuestras necesidades.
+
+El segundo paso fue el elaborar una codificación del programa en un lenguaje de alto nivel
+como lo es el lenguaje C, para luego ser implementado en lenguaje ensamblador. 
+
+\newpage
+El código elaborado
+fue el siguiente:
+\subsection{Correspondencia del codigo ensablador con el programa en lenguaje C}
+\lstinputlisting[language=C]{PRAC2.c}
+
+\newpage
+\subsection{Resultados y Analisis}
+Para comprobar que se ha elaborado una buena implementación del método congruencial lineal
+mixto y el algoritmo de ordenamiento Burbuja, se ha elaborado 3 casos de prueba en los cuales se
+evaluaron la efectividad de estos dos métodos, el primero de ellos se ha colocado un valor $n=79$, y los
+resultados obtenidos fueron los siguientes:
+\begin{center}
+\includegraphics[scale=0.5]{icler1}
+
+\includegraphics[scale=0.5]{icler2}
+\end{center}
+
+Al terminar la ejecución del programa con el primer caso se obtuvo el resultado deseado, que es
+tener el vector de elementos ASCII ordenamos.
+
+\begin{center}
+\includegraphics[scale=0.5]{icler3}
+
+\includegraphics[scale=0.5]{icler4}
+
+\includegraphics[scale=0.5]{icler5}
+\end{center}
+
+En el segundo caso de prueba, se ha colocado un nuevo valor al $n=15$, el cual nos arrojó de
+igual manera que en el primer caso, que fue generar una cantidad $n$ de elementos pseudoaleatoreos y
+que estos fuesen ordenados efectivamente con el algoritmo de ordenamiento burbuja.
+
+\begin{center}
+\includegraphics[scale=0.5]{icler6}
+
+\includegraphics[scale=0.5]{icler7}
+\end{center}
+
+Y en el último caso de prueba sea colocado el valor para $n=21$, obteniendo los mismo resultados
+del algoritmo de ordenamiento burbuja
+
+\begin{center}
+\includegraphics[scale=0.5]{icler8}
+
+\includegraphics[scale=0.5]{icler9}
+
+\includegraphics[scale=0.5]{icler10}
+
+\includegraphics[scale=0.5]{icler11}
+\end{center}
+
+\newpage
+\section{Conclusión}
+El método de ordenamiento burbuja, ha demostrado su efectividad en esta práctica, al igual
+que el método congruencial lineal mixto, ya que se ha podido cumplir con el objetivo de la práctica, en
+la elaboración de un programa en lenguaje ensamblador.
+
+Aunque el método de ordenamiento burbuja es de O($n^{2}$), no es recomendado para su uso ya
+que su tiempo de ejecución es lento. Entre los algoritmos de ordenamiento O($n^{2}$), se recomienda el
+algoritmo de inserción.
+
+Por otra parte, como ya se mencionó, el método congruencial lineal, ha sido efectivo en esta
+práctica, y se obtuvo los resultados deseados con la implementación del mismo, ya que se pudo generar
+un vector con elementos ASCII de forma pseudoaleatoreo, y poder ser almacenados a partir de la
+dirección 30H en RAM del microcontrolador Intel 8051.
+
+\newpage
+\section{Referencias}
+\begin{itemize}
+\item Ehu. 8051 Set de instrucciones: XCH.
+
+\url{http://www.sc.ehu.es/sbweb/webcentro/automatica/web_8051/Contenido/set_8051/Instrucciones/51xch
+.htm}
+
+\item Ehu. 8051 Set de instrucciones: DIV.
+
+\url{http://www.sc.ehu.es/sbweb/webcentro/automatica/web_8051/Contenido/set_8051/Instrucciones/51div.
+htm}
+
+\item Ehu. 8051 Set de instrucciones: MUL.
+
+\url{http://www.sc.ehu.es/sbweb/webcentro/automatica/web_8051/Contenido/set_8051/Instrucciones/51mu
+l.htm}
+
+\item Ehu. 8051 Set de instrucciones: ADD.
+
+\url{http://www.sc.ehu.es/sbweb/webcentro/automatica/web_8051/Contenido/set_8051/Instrucciones/51add
+.htm}
+
+\item Ehu. 8051 Set de instrucciones: SUBB.
+
+\url{http://www.sc.ehu.es/sbweb/webcentro/automatica/web_8051/Contenido/set_8051/Instrucciones/51sub
+b.htm}
+
+\item Omar Trinida(Septiembre 19, 2010). 314159bits. Generar Números Aleatorios con Métodos
+Congruenciales.
+
+\url{https://314159bits.wordpress.com/2010/09/19/generar-numeros-aleatorios-con-
+metodo-congruenciales/}
+
+\item Carlos Marquez Fernandez. Carlos Marquez. Método Congruencial
+
+\url{https://carlosmarquez.files.wordpress.com/2012/02/unidad-4-generacion-de-numeros-
+pseudoaleatorios1.pdf}
+
+\item Wikipedia. Ordenamiento de burbuja. 
+
+\url{https://es.wikipedia.org/wiki/Ordenamiento_de_burbuja}
+
+\item Zentut. C Bubble Sort. 
+
+\url{http://www.zentut.com/c-tutorial/c-bubble-sort/}
+\end{itemize}
+\end{document}
